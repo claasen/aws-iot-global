@@ -1,0 +1,27 @@
+service: iot-command
+
+frameworkVersion: "=1.52.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: ${opt:region}
+  endpointType: REGIONAL
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetItem"
+      Resource:
+        - "*"
+
+functions:
+  command:
+    handler: index.sendCommand
+    events:
+      - http:
+          path: command/{command}/{id}
+          method: post
+          cors: true

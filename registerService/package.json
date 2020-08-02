@@ -1,0 +1,12 @@
+{
+  "name": "register-service",
+  "version": "1.0.0",
+  "description": "Register service",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "2.536.0",
+    "uuid": "3.4.0"
+  },
+  "author": "Rainer Lutsch",
+  "license": "ISC"
+}

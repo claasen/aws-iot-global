@@ -1,0 +1,27 @@
+service: iot-data-access-service
+
+frameworkVersion: "=1.52.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: ${opt:region}
+  endpointType: REGIONAL
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:GetItem"
+      Resource:
+        - "*"
+
+functions:
+  accessData:
+    handler: index.getData
+    events:
+      - http:
+          path: data/{id}
+          method: get
+          cors: true

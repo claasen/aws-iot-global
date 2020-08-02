@@ -1,0 +1,96 @@
+service: iot-data-input-service
+
+frameworkVersion: "=1.52.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: ${opt:region}
+  endpointType: REGIONAL
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+      Resource:
+        - "*"
+
+functions:
+  processInputData:
+    handler: index.process
+    events:
+      - stream:
+          type: kinesis
+          arn: arn:aws:kinesis:${opt:region}:xxxxxxxxxxxx:stream/data-input-stream
+          batchSize: 10
+          startingPosition: TRIM_HORIZON
+          enabled: true
+
+resources:
+  Resources:
+    thingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: rl-data-table
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+        StreamSpecification:
+          StreamViewType: NEW_AND_OLD_IMAGES
+    dataInputStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: data-input-stream
+        ShardCount: 2
+        StreamEncryption:
+          EncryptionType: KMS
+          KeyId: alias/aws/kinesis
+    dataInputRule:
+      Type: "AWS::IoT::TopicRule"
+      Properties:
+        RuleName: dataInputRule
+        TopicRulePayload:
+          RuleDisabled: false
+          Sql: "SELECT *, topic(2) as id FROM 'data/+'"
+          AwsIotSqlVersion: "2016-03-23"
+          Actions:
+            - Kinesis:
+                RoleArn:
+                  Fn::GetAtt:
+                    - "PushKinesisRole"
+                    - "Arn"
+                StreamName:
+                  Ref: "dataInputStream"
+                PartitionKey: topic(2)
+    PushKinesisRole:
+      Type: "AWS::IAM::Role"
+      Properties:
+        RoleName: data-kinesis
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Service:
+                  - iot.amazonaws.com
+              Action:
+                - sts:AssumeRole
+        Policies:
+          - PolicyName: "data-input-policy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "kinesis:PutRecord"
+                    - "kinesis:PutRecords"
+                  Resource:
+                    Fn::GetAtt:
+                      - "dataInputStream"
+                      - "Arn"

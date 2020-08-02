@@ -1,0 +1,11 @@
+{
+  "name": "data-input-service",
+  "version": "1.0.0",
+  "description": "Data input service",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "2.536.0"
+  },
+  "author": "Rainer Lutsch",
+  "license": "ISC"
+}

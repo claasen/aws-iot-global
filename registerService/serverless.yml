@@ -1,0 +1,52 @@
+service: iot-registration-service
+
+frameworkVersion: "=1.52.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: ${opt:region}
+  endpointType: REGIONAL
+  memorySize: 128
+  timeout: 10
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "dynamodb:PutItem"
+      Resource:
+        - "*"
+    - Effect: "Allow"
+      Action:
+        - "iot:CreateKeysAndCertificate"
+      Resource:
+        - "*"
+
+functions:
+  registerThing:
+    handler: index.register
+    events:
+      - http:
+          path: register/
+          method: post
+
+resources:
+  Resources:
+    thingTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: thing-table
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
+custom:
+  customDomain:
+    domainName: api.rainor.de
+    basePath: iot
+    stage: ${self:provider.stage}
+    createRoute53Record: true

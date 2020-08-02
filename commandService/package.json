@@ -1,0 +1,11 @@
+{
+    "name": "command-service",
+    "version": "1.0.0",
+    "description": "Command service",
+    "main": "index.js",
+    "dependencies": {
+        "aws-sdk": "2.536.0"
+    },
+    "author": "Rainer Lutsch",
+    "license": "ISC"
+}

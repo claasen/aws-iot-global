@@ -1,0 +1,11 @@
+{
+    "name": "data-access-service",
+    "version": "1.0.0",
+    "description": "Data access service",
+    "main": "index.js",
+    "dependencies": {
+        "aws-sdk": "2.536.0"
+    },
+    "author": "Rainer Lutsch",
+    "license": "ISC"
+}
