@@ -33,7 +33,7 @@ resources:
     thingTable:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: rl-data-table
+        TableName: data-table
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
